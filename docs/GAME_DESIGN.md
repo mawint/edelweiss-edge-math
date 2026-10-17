@@ -31,7 +31,7 @@ A round is decided first and acted out second.
 | Hard | 3 steps |
 | Pinpoint | 1 step |
 
-2. A **slider** places the window anywhere on steps 0 to 25.
+2. The player **drags the window** along the mountain to any start on steps 0 to 25. Arrow buttons (and the arrow keys) move it a step at a time as a backup.
 3. Ueli climbs. If he stops inside the window, the bet wins.
 
 **Pay = RTP / (P(window) × 1.278125)**, quoted down to a 0.10× step. 1.278125 is the average edelweiss multiplier, the same in every round (see Edelweiss). Every window pays under 500×, so every placement is offered.
@@ -119,7 +119,7 @@ In a book, the `to` of every move is where the next move starts. `settle.win` eq
 
 ## Open questions
 
-- **Can Stake Engine take 92 bet modes in one game?** Each mode is its own lookup table and books file. If it can't, the fallback is to snap the slider to every other start step, which roughly halves the window modes (about 47).
+- **Can Stake Engine take 92 bet modes in one game?** Each mode is its own lookup table and books file. If it can't, the fallback is to snap the window to every other start step, which roughly halves the window modes (about 47).
 - **0.10× payout steps.** The other games assume the RGS only accepts payouts in 0.10× steps, so pays are quoted down to 0.10× and the optimizer closes a gap of up to ~6% on the cheapest Easy windows. It does that by giving their wins blooms more often than 1 in 3. If 0.01× is allowed, the pays could be quoted to the cent and the gap all but disappears.
 - **Equal neighbouring pays.** Quoted to 0.10×, Easy on steps 0 and 1 both pay 1.5×. Is that fine, or should a window never quote the same as the one below it?
 - **Bloom placement** is even over steps 0 to the stop, which counts base camp too. Should a bloom never sit on step 0?
@@ -129,6 +129,7 @@ In a book, the `to` of every move is where the next move starts. `settle.win` eq
 
 1. **Math (done, second pass):** stop weights, stories, features, blooms, the 92 modes, books and tests.
 2. **Math, run:** `run.py` with the optimizer for all modes, then `stats.py` and the SDK checks. Settle the mode-count question first.
-3. **Game, placeholder (done):** the ridge, the window slider, Climb, played from fixture books through the mock RGS.
-4. **Art direction:** pick the art style, then design the ridge, Ueli, the features and the blooms.
-5. **Game, real:** stage every event, a rules screen from the exported numbers, social-casino wording, replay, then the Stake build and `engine-review-prompt.md`.
+3. **Game, placeholder (done):** the ridge, a window control, Climb, played from fixture books through the mock RGS.
+4. **Art direction (done):** alpine cartoon: chunky ink outlines that boil, squash and stretch, a sunset palette, a follow-cam.
+5. **Game, first real pass (done):** every event staged on a canvas, synthesized sound with one mute, the window dragged in frame, space to climb, the review's screen sizes.
+6. **Game, to finish:** a rules screen from the exported numbers, autoplay and turbo, replay polish, then `engine-review-prompt.md`.
