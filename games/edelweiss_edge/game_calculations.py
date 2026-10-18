@@ -57,9 +57,7 @@ class GameCalculations(Executables):
     def story(self, stop) -> tuple:
         """How the round reaches `stop`: a feature set (by its calibrated odds for this stop), then one of
         its stories, evenly. Each move is (kind, steps, to)."""
-        stories = self.config.stories
-        feature_set = weighted(stories.odds[stop])
-        return random.choice(stories.candidates(feature_set, stop))
+        return tuple(self.config.stories.pick(stop))
 
     def place_blooms(self, top: int, force: bool) -> list[dict]:
         """The round's blooms, each on a step 0..`top` he passes (two may share a step); the golden one,

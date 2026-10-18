@@ -24,7 +24,7 @@ def climb_event(gamestate, n: int, steps: int, to: int) -> None:
 
 
 def feature_event(gamestate, kind: str, to: int) -> None:
-    """A feature moves him to step `to`: gondola (up 2-4), avalanche (down 2-5), echo (the last climb
+    """A feature moves him to step `to`: gondola (up 2-4), avalanche (down 2 or more, as far as base camp), echo (the last climb
     again), foehn (1-3 either way) or rescue (Barry carries him back to step 25 after a fall)."""
     add_event(gamestate, "feature", kind=kind, to=to)
 

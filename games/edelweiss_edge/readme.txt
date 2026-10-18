@@ -3,9 +3,9 @@ window of steps) or that he goes over the edge. One bet = one round; the book is
 design is docs/GAME_DESIGN.md (the same file is in the game repo, mawint/edelweiss-edge). The game reads
 these books with src/book.ts.
 
-THE MODEL (second pass, October 17, 2026: the stop is decided first, pay rises toward the edge)
+THE MODEL (October 17, 2026: the stop is decided first, pay rises toward the edge; one yodel at most)
   climb.py              the stop weights, the multiplier, each window's pay, and every story (how a round
-                        acts out its stop) with the calibrated feature draw rates. No SDK.
+                        acts out its stop) with the calibrated feature draw rates and yodel weight. No SDK.
   game_config.py        every rate and value, and the bet modes (generated: 92)
   game_calculations.py  deals a round: the stop, its story, the blooms on the way, the win
   gamestate.py          plays the round into book events and pays it
@@ -17,11 +17,15 @@ THE MODEL (second pass, October 17, 2026: the stop is decided first, pay rises t
 
   The stop: step k (0-25) weighs 7134 - 264k out of 100,000, over the edge 316. Of step 25's 534, 79 are told
   as a fall and Barry's Rescue (1 in 5 falls shown); Over the Edge wins only on a real fall (0.316%).
-  The story: three climbs of 0-9 steps and the features, Gondola Lift (+2-4 after climb 1 or 2, 1 in 9),
-  Avalanche (-2-5 after climb 2 when above step 6, 1 in 10), Alphorn Echo (the last climb again, 1 in 14),
-  Foehn Wind (+-1-3 at the end, 1 in 7). A round draws its feature set (calibrated rates), redrawn until a
-  story reaches its stop, then one of those stories evenly. Never below step 0; on the ridge never past 25;
-  a fall crosses 25 on its last move. Features never change the odds.
+  The story: three climbs of 0-9 steps, at most one of them 0 (one yodel a round at most), and the
+  features: Gondola Lift (+2-4 after climb 1 or 2, 1 in 9), Avalanche (after climb 2 or 3 when above step
+  4: back 2 steps or more, as far as base camp; 1 in 10), Alphorn Echo (the last climb again, 1 in 14),
+  Foehn Wind (+-1-3 at the end, 1 in 7). Low stops are told as "climbed, then knocked back" (stops 0 and 1
+  always need an avalanche or the wind). A round draws its feature set (calibrated rates), redrawn until a
+  story reaches its stop; then a story with a yodel or without (weighted so a yodel comes in 27.1% of
+  rounds, as with three fair climbs); then one of those evenly. Never below step 0; on the ridge never past
+  25; a fall crosses 25 on its last move. Features never change the odds. climb.py enumerates every story
+  (about 2 million) with numpy.
   Edelweiss (independent of the stop): no blooms 2/3, one 1/6, two 1/6 (+0.5x each); a Golden Edelweiss
   1 in 400 (x10). Placed on steps 0..stop (0..25 for a fall), hidden until reached, all collected:
   E[multiplier] = 1.278125.

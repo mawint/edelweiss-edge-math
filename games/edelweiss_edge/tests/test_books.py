@@ -87,7 +87,7 @@ def test_dealt_rounds_match_the_odds():
     state.betmode, state.criteria = "edge", "0"
     stops = stop_odds()
     n = 40_000
-    seen, stops_seen, blooms, golden = Counter(), Counter(), 0, 0
+    seen, stops_seen, blooms, golden, yodels = Counter(), Counter(), 0, 0, 0
     for _ in range(n):
         stop = random.choices(list(stops), weights=list(stops.values()))[0]
         plan = state.deal(stop)
@@ -95,8 +95,12 @@ def test_dealt_rounds_match_the_odds():
         seen.update({e.get("kind", e["type"]) for e in plan["events"] if e["type"] in ("feature", "fall")})
         blooms += sum(not b["golden"] for b in plan["blooms"])
         golden += any(b["golden"] for b in plan["blooms"])
+        zeros = sum(e["type"] == "climb" and e["steps"] == 0 for e in plan["events"])
+        assert zeros <= 1  # one yodel a round at most
+        yodels += zeros
     for feature, rate in {"gondola": 1 / 9, "avalanche": 1 / 10, "echo": 1 / 14, "foehn": 1 / 7}.items():
         assert seen[feature] / n == pytest.approx(rate, rel=0.08), feature
     assert seen["rescue"] / seen["fall"] == pytest.approx(1 / 5, abs=0.05)
     assert blooms / n == pytest.approx(0.5, rel=0.05)  # 1/6 one bloom + 1/6 two
     assert golden / n == pytest.approx(1 / 400, rel=0.4)
+    assert yodels / n == pytest.approx(1 - 0.9**3, rel=0.05)

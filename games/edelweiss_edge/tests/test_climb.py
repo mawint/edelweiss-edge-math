@@ -60,30 +60,55 @@ def test_every_mode_returns_just_under_the_rtp_before_the_optimizer(name):
     assert max(w for w, p in wins.items() if p > 0) < CONFIG.wincap * 100
 
 
-def test_every_story_lands_on_its_stop_and_keeps_the_rules():
-    for feature_set, by_stop in STORIES.table.items():
-        for stop, stories in by_stop.items():
-            for story in stories:
-                pos = 0
-                for kind, steps, to in story:
-                    assert to == pos + steps and to >= 0
-                    if kind == "climb":
-                        assert 0 <= steps <= 9
-                    elif kind == "avalanche":
-                        assert pos > 6 and 2 <= -steps <= 5
-                    pos = to
-                assert sum(kind == "climb" for kind, _, _ in story) == 3
-                assert ending(story) == stop
-                tos = [to for _, _, to in story]
-                if stop == EDGE:
-                    assert max(tos[:-1]) <= TOP < tos[-1]  # crosses 25 on its last move
-                else:
-                    assert max(tos) <= TOP and tos[-1] == stop
+def check_story(story, stop):
+    """A story's moves chain from base camp and keep every rule, and it reaches `stop`."""
+    pos = 0
+    for kind, steps, to in story:
+        assert to == pos + steps and to >= 0
+        if kind == "climb":
+            assert 0 <= steps <= 9
+        elif kind == "avalanche":
+            assert pos > 4 and 2 <= -steps <= pos  # above step 4; 2 steps or more, at most to base camp
+        pos = to
+    climbs = [steps for kind, steps, _ in story if kind == "climb"]
+    assert len(climbs) == 3 and climbs.count(0) <= 1
+    assert ending(story) == stop
+    tos = [to for _, _, to in story]
+    if stop == EDGE:
+        assert max(tos[:-1]) <= TOP < tos[-1]  # crosses 25 on its last move
+    else:
+        assert max(tos) <= TOP and tos[-1] == stop
 
 
-def test_every_stop_has_a_story():
+def test_no_story_has_two_zero_climbs():
+    for params, _ in STORIES.table.values():
+        assert ((params[:, :3] == 0).sum(axis=1) <= 1).all()
+
+
+def test_stories_land_on_their_stop_and_keep_the_rules():
+    # (about 2 million stories: a spread of each feature set's stories for each stop)
+    for fs, (_, bounds) in STORIES.table.items():
+        for stop, (lo, _, hi) in bounds.items():
+            for index in sorted({(hi - lo - 1) * k // 24 for k in range(25)}):
+                check_story(STORIES.story(fs, stop, index), stop)
+
+
+def test_a_yodel_comes_as_often_as_with_three_fair_climbs():
+    assert STORIES.yodel_share == pytest.approx(1 - 0.9**3, abs=1e-6)
+
+
+def test_every_stop_has_stories():
     for stop in stop_odds():
-        assert STORIES.candidates((0, 0, 0, 0), stop)
+        assert STORIES.odds[stop] and all(STORIES.count(fs, stop) for fs in STORIES.odds[stop])
+
+
+def test_stop_0_can_be_an_avalanche_back_to_base_camp():
+    found = []
+    for fs in STORIES.odds[0]:
+        if fs[1]:
+            story = STORIES.story(fs, 0, 0)
+            found += [m for m in story if m[0] == "avalanche" and m[2] == 0]
+    assert found
 
 
 def test_features_come_up_at_their_targets():

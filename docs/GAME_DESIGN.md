@@ -55,15 +55,17 @@ Pays rise toward the edge for every difficulty. Quoted to 0.10×, two neighbours
 
 ## The story: climbs and features
 
-A story is **three climbs** ("Climb 1 of 3" on screen) of **0 to 9 steps** each. A 0 means he stops to yodel. The features come in between:
+A story is **three climbs** ("Climb 1 of 3" on screen) of **0 to 9 steps** each. A 0 means he stops to yodel, and **at most one climb a round is a 0**: one yodel at most, never two zeros and never 0, 0, 0. The features come in between:
 
 | feature | when | what | how often |
 |---|---|---|---|
 | Gondola Lift | after climb 1 or 2 (half each) | +2 to +4 steps | 1 in 9 rounds |
-| Avalanche | after climb 2, only when he's above step 6 | -2 to -5 steps | 1 in 10 rounds |
-| Alphorn Echo | after climb 3 | the last climb's steps again (never a 0) | 1 in 14 rounds |
+| Avalanche | after climb 2 or after climb 3 (half each; at most one a round), only when he's above step 4 | knocks him back 2 steps or more, as far as base camp (step 0) | 1 in 10 rounds |
+| Alphorn Echo | right after climb 3 | the last climb's steps again (never a 0) | 1 in 14 rounds |
 | Föhn Wind | at the end | 1 to 3 steps either way | 1 in 7 rounds |
 | Barry's Rescue | after a fall | back on step 25 | 1 in 5 falls shown |
+
+The order in a round: climb 1, [gondola], climb 2, [gondola], [avalanche], climb 3, [echo], [avalanche], [föhn].
 
 Every story follows these rules:
 
@@ -71,17 +73,26 @@ Every story follows these rules:
 - A story that stops on the ridge never goes past step 25 along the way, and ends exactly on its stop.
 - A story that falls crosses step 25 on its **last move**, then the `fall` event follows (and, for a rescue, the rescue).
 
-**How a story is picked.** Each feature is drawn at a calibrated rate, and the draw is redone until some story with those features reaches the round's stop. Three climbs alone reach every stop, so the redraw always ends. One of the stories that fit is then picked evenly.
+**Low stops are told as "climbed, then knocked back".** With one yodel at most, three climbs alone can't end below step 2, so stops 0 and 1 always come with an avalanche or the wind. For example, 3, 4, 2, then an avalanche back to base camp after climb 3; or 0, 1, 2, then the föhn blowing him down 3. Low stops are common (step 0 alone is 7.1% of rounds), so 6.7% of all rounds have an avalanche at stops 0 to 3. That is most of the avalanche's 1 in 10; the rest strike higher up.
 
-Some stops can't take some features. For example, a stop on step 0 can only have a gondola if the wind blows him back down, and a fall can't have an echo after the climb that crossed the edge. So the draw rates are calibrated upward until each feature comes up at its target across all rounds.
+**How a story is picked.**
+
+1. Each feature is drawn at a calibrated rate, and the draw is redone until some story with those features reaches the round's stop.
+2. A story with a yodel or without is chosen. Low stops have mostly yodel stories, so yodel stories are weighted down (×0.21) until a yodel comes up in 27.1% of rounds, as often as with three fair 0-9 climbs (1 − 0.9³).
+3. One of those stories is picked evenly.
+
+Some stops can't take some features. For example, a fall can't have an echo after the climb that crossed the edge, and stops 0 and 1 need an avalanche or the wind. So the draw rates are calibrated until each feature comes up at its target across all rounds.
 
 | feature | target | draw rate | achieved (exact) | dealt, 400k rounds |
 |---|---|---|---|---|
-| Gondola Lift | 1 in 9 | 0.1266 | 1 in 9.00 | 1 in 9.01 |
-| Avalanche | 1 in 10 | 0.1144 | 1 in 10.00 | 1 in 10.00 |
-| Alphorn Echo | 1 in 14 | 0.0831 | 1 in 14.00 | 1 in 13.89 |
-| Föhn Wind | 1 in 7 | 0.1363 | 1 in 7.00 | 1 in 7.04 |
-| Barry's Rescue | 1 in 5 falls | (fixed by the weights) | 1 in 5.00 | 0.200 of falls |
+| Gondola Lift | 1 in 9 | 0.1321 | 1 in 9.00 | 1 in 9.00 |
+| Avalanche | 1 in 10 | 0.0457 | 1 in 10.00 | 1 in 9.97 |
+| Alphorn Echo | 1 in 14 | 0.0790 | 1 in 14.00 | 1 in 14.04 |
+| Föhn Wind | 1 in 7 | 0.0664 | 1 in 7.00 | 1 in 7.00 |
+| Barry's Rescue | 1 in 5 falls | (fixed by the weights) | 1 in 5.00 | 1 in 5 (sampling noise: 0.18-0.21) |
+| one yodel | 27.1% of rounds | (yodel weight 0.21) | 27.10% | 27.18% |
+
+The avalanche and föhn draw rates are low because the low stops already need them so often.
 
 ## Edelweiss
 
